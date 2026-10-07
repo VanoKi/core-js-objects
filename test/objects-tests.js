@@ -185,6 +185,14 @@ describe('objects-tasks', () => {
           queue: [25, 100],
           expected: false,
         },
+        {
+          queue: [25, 25, 25, 100],
+          expected: true,
+        },
+        {
+          queue: [25, 25, 25, 25, 50, 100, 50],
+          expected: true,
+        },
       ].forEach((data) => {
         assert.equal(tasks.sellTickets(data.queue), data.expected);
       });
@@ -429,7 +437,7 @@ describe('objects-tasks', () => {
   );
 
   it.optional(
-    'cssSelectorBuilder should creates css selector object with stringify() method',
+    'cssSelectorBuilder should create css selector object with stringify() method',
     () => {
       const builder = tasks.cssSelectorBuilder;
 
@@ -575,9 +583,9 @@ describe('objects-tasks', () => {
       ].forEach((fn) => {
         assert.throws(
           fn,
-          /Element, id and pseudo-element should not occur more then one time inside the selector/,
+          /Element, id and pseudo-element should not occur more than one time inside the selector/,
 
-          '\nPlease throw an exception "Element, id and pseudo-element should not occur more then one time inside the selector" ' +
+          '\nPlease throw an exception "Element, id and pseudo-element should not occur more than one time inside the selector" ' +
             'if element, id or pseudo-element occurs twice or more times'
         );
       });
@@ -589,7 +597,7 @@ describe('objects-tasks', () => {
       ].forEach((fn) => {
         assert.doesNotThrow(
           fn,
-          /Element, id and pseudo-element should not occur more then one time inside the selector/
+          /Element, id and pseudo-element should not occur more than one time inside the selector/
         );
       });
 
