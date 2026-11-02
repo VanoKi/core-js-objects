@@ -170,11 +170,11 @@ function sellTickets(queue) {
   let bills25 = 0;
   let bills50 = 0;
 
-  for (const bill of queue) {
+  return queue.every((bill) => {
     switch (bill) {
       case 25:
         bills25 += 1;
-        break;
+        return true;
       case 50:
         if (bills25 === 0) {
           return false;
@@ -182,23 +182,24 @@ function sellTickets(queue) {
 
         bills25 -= 1;
         bills50 += 1;
-        break;
+        return true;
       case 100:
         if (bills50 > 0 && bills25 > 0) {
           bills50 -= 1;
           bills25 -= 1;
-        } else if (bills25 >= 3) {
-          bills25 -= 3;
-        } else {
-          return false;
+          return true;
         }
-        break;
+
+        if (bills25 >= 3) {
+          bills25 -= 3;
+          return true;
+        }
+
+        return false;
       default:
         return false;
     }
-  }
-
-  return true;
+  });
 }
 
 /**
