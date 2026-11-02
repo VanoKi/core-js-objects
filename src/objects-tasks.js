@@ -338,6 +338,97 @@ function group(array, keySelector, valueSelector) {
   return groups;
 }
 
+function makeSelector(
+  text,
+  lastPart,
+  hasElement = false,
+  hasId = false,
+  hasPseudoElement = false
+) {
+  const duplicateError =
+    'Element, id and pseudo-element should not occur more than one time inside the selector';
+  const orderError =
+    'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element';
+
+  return {
+    text,
+    lastPart,
+    hasElement,
+    hasId,
+    hasPseudoElement,
+
+    element(value) {
+      if (this.hasElement) {
+        throw new Error(duplicateError);
+      }
+      if (this.lastPart > 0) {
+        throw new Error(orderError);
+      }
+      this.text += value;
+      this.hasElement = true;
+      this.lastPart = 0;
+      return this;
+    },
+
+    id(value) {
+      if (this.hasId) {
+        throw new Error(duplicateError);
+      }
+      if (this.lastPart > 1) {
+        throw new Error(orderError);
+      }
+      this.text += `#${value}`;
+      this.hasId = true;
+      this.lastPart = 1;
+      return this;
+    },
+
+    class(value) {
+      if (this.lastPart > 2) {
+        throw new Error(orderError);
+      }
+      this.text += `.${value}`;
+      this.lastPart = 2;
+      return this;
+    },
+
+    attr(value) {
+      if (this.lastPart > 3) {
+        throw new Error(orderError);
+      }
+      this.text += `[${value}]`;
+      this.lastPart = 3;
+      return this;
+    },
+
+    pseudoClass(value) {
+      if (this.lastPart > 4) {
+        throw new Error(orderError);
+      }
+      this.text += `:${value}`;
+      this.lastPart = 4;
+      return this;
+    },
+
+    pseudoElement(value) {
+      if (this.hasPseudoElement) {
+        throw new Error(duplicateError);
+      }
+      if (this.lastPart > 5) {
+        throw new Error(orderError);
+      }
+      this.text += `::${value}`;
+      this.hasPseudoElement = true;
+      this.lastPart = 5;
+      return this;
+    },
+
+    stringify() {
+      return this.text;
+    },
+  };
+}
+
 /**
  * Css selectors builder
  *
@@ -393,32 +484,36 @@ function group(array, keySelector, valueSelector) {
  */
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  element(value) {
+    return makeSelector(value, 0, true);
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    return makeSelector(`#${value}`, 1, false, true);
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    return makeSelector(`.${value}`, 2);
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    return makeSelector(`[${value}]`, 3);
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    return makeSelector(`:${value}`, 4);
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    return makeSelector(`::${value}`, 5, false, false, true);
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    return {
+      stringify() {
+        return `${selector1.stringify()} ${combinator} ${selector2.stringify()}`;
+      },
+    };
   },
 };
 
